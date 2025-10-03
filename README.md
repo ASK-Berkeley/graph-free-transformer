@@ -27,3 +27,15 @@ python -m mmlm.train +models=llama_57M_ch +omol_scaling_experiments=model_scalin
 ```
 
 Note that metadata files (energy and force mean/std) can be found [here](https://drive.google.com/file/d/17YvBVwQmr-VQFSJgSJbYwq2Z4Unma7Qw/view?usp=sharing).
+
+## Bibtex
+
+If you find this useful, please consider citing:
+
+```bibtex
+@article{kreiman2025transformers,
+title={Transformers Discover Molecular Structure Without Graph Priors},
+author={Kreiman, Tobias and Bai, Yutong and Atieh, Fadi and Weaver, Elizabeth and Qu, Eric and Krishnapriyan, Aditi S},
+journal={arXiv preprint arXiv:2510.02259},
+year={2025}
+}
