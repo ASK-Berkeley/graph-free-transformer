@@ -1,0 +1,104 @@
+# @package _global_
+defaults:
+  - /models/llama_306M_ch
+  - /data/omol_4M
+  - /schedulers/cos_min_lr
+
+
+wandb:
+  group_name: omol_ft
+  run_name: 306M_final
+
+dataset:
+  # If null, use all data. Update for different scaling experiments.
+  pipeline_v2: True
+  training_percentage: null
+  per_atom_target: False
+  energy_last: False
+  force_last: True
+  n_val: 1024
+  rotation_augmentation: True
+  permutation_augmentation: False
+  continuous: True
+  n_bins:
+    pos: 10
+    force: 10
+    target: 2048
+  joint_embedding: True
+  joint_embedding_force: True
+  joint_embed_atoms: True
+  first_force_only: False
+  prior_path_train: null
+  prior_path_val: null
+  norm_stats_path: data/Omol/train_metadata.npy
+  name: omol
+
+  train_dataset:
+    _target_: mmlm.datasets_v2.builder.build_dataset
+    cfg:
+      _target_: mmlm.datasets_v2.config.DatasetV2Cfg
+      loader:
+        _target_: mmlm.datasets_v2.loaders.omol_loader.OmolLoader
+        path: data/Omol/train_4M
+      transforms:
+        - _target_: mmlm.datasets_v2.core.transforms.RotationTransform
+      formatter:
+        _target_: mmlm.datasets_v2.core.formatter.AtomFormatter
+        finetune: True
+      bin_spec_path: data/bins/omol_joint_bins_10_10_2048.npz
+
+  val_dataset:
+    _target_: mmlm.datasets_v2.builder.build_dataset
+    cfg:
+      _target_: mmlm.datasets_v2.config.DatasetV2Cfg
+      loader:
+        _target_: mmlm.datasets_v2.loaders.omol_loader.OmolLoader
+        path: data/Omol/val
+      transforms: [] # No augmentations for validation
+      formatter:
+        _target_: mmlm.datasets_v2.core.formatter.AtomFormatter
+      bin_spec_path: data/bins/omol_joint_bins_10_10_2048.npz
+
+training:
+  bf16: True
+  batch_size: 4
+  gradient_accumulation_steps: 8
+  warmup_ratio: 0.05
+  lr: 0.0003
+  lr_scheduler_kwargs:
+    min_lr: 0.0005
+  use_muon: True
+  muon_lr: 0.01
+  muon_weight_decay: 0.0001
+  torch_compile: True
+  eval_steps: 500
+  dataloader_num_workers: 16
+  num_epochs: 80
+  eval_batch_size: 64
+  eval_accumulation_steps: 1
+  nan_loss_cutoff: 10000
+  max_grad_norm: 100
+  full_eval: False
+  resume_from_checkpoint: False
+  model_bf16: false
+  finetune: True
+  ft_normalize_batch: True
+  weight_decay: 0.0001
+  checkpoint: null
+  max_force_per_item: 350
+  fsdp: False
+
+model:
+  model_type: llama_pos_readout
+  prefix_causal_mask: True
+  mlp_output_head: True
+  energy_head: True
+  llama_mlp: True
+  pre_readout_layer_norm: True
+  no_pos_embed: True
+  concat_embeddings: True
+  loss_weights:
+    target: 10
+    force: 10
+  loss_name: l2mae
+

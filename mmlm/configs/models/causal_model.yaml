@@ -1,0 +1,9 @@
+# @package _global_
+dataset:
+  return_target: false
+  target_bins: 128
+  even_bins: true
+  energy_last: true
+
+training:
+  eval_batch_size: 32

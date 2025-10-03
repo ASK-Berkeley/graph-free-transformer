@@ -1,0 +1,53 @@
+# @package _global_
+defaults:
+  - /models/llama_57M_ch
+  - /data/omol_4M
+
+
+wandb:
+  group_name: Omol
+  run_name: 57M_last_only_delta
+
+dataset:
+  # If null, use all data. Update for different scaling experiments.
+  training_percentage: null
+  energy_last: False
+  force_last: True
+  n_val: 1000
+  rotation_augmentation: True
+  permutation_augmentation: True
+  per_atom_target: False
+  continuous: True
+  n_bins:
+    pos: 10
+    force: 4096
+    target: 2048
+  joint_embedding: True
+  first_force_only: True
+  prior_path_train: null
+  prior_path_val: null
+  name: omol_fast
+
+training:
+  fp16: True
+  batch_size: 32
+  gradient_accumulation_steps: 1
+  lr: 0.0003
+  torch_compile: False
+  eval_steps: 500
+  dataloader_num_workers: 0
+  num_epochs: 30
+  eval_batch_size: 16
+  nan_loss_cutoff: 20
+  max_grad_norm: 1
+  full_eval: False
+  resume_from_checkpoint: True
+  model_bf16: false
+
+model:
+  model_type: llama_continuous
+  loss_weights:
+    target: 1
+    force: 1
+    pos: 1
+  loss_name: xent

@@ -1,0 +1,6 @@
+# @package _global_
+training:
+  metric_for_best_model: force_mae
+  lr_scheduler: cosine_with_restarts
+  lr_scheduler_kwargs:
+    num_cycles: 3

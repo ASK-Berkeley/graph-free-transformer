@@ -1,0 +1,147 @@
+wandb:
+  run_name: "debug"
+  group_name: "debug"
+
+debug: false
+
+pipeline_v2: True
+
+training:
+  logs_path: exp_logs
+  eval_steps: 2000
+  save_steps: 2000
+  logging_steps: 200
+  dataloader_num_workers: 0
+  use_spawn: false
+  dataloader_prefetch_factor: null
+  # Optimizer
+  lr: 0.0007
+  weight_decay: 0.0
+  batch_size: 256
+  eval_batch_size: null # if none, set to batch_size
+  num_epochs: 50
+  target_weight: 1.0
+  lr_scheduler: cosine
+  warmup_ratio: 0.05 # 5% warmup
+  optim_name: adamw_torch_fused
+  # Muon optimizer settings (set use_muon: true to enable)
+  # We experimented with muon but had trouble training stably with it.
+  # We leave it in here for future experimentation.
+  use_muon: false
+  muon_lr: 0.02  # Higher LR for Muon on hidden weights (typical range: 0.01-0.05)
+  muon_weight_decay: 0.01  # Weight decay for Muon parameters
+  # Gradient clipping
+  max_grad_norm: 1.0
+  save_total_limit: 10
+  load_best_model_at_end: True
+  gradient_accumulation_steps: 1
+  torch_compile: false
+  # Compile even when debug
+  force_compile: false
+  eval_accumulation_steps: null
+  checkpoint: null
+  # if true, resumes from the state / epoch of the checkpoint
+  # if not, and checkpoint is provided, starts a new training run (reset lr scheduler etc) from the checkpoint
+  resume_from_checkpoint: False
+  fp16: false
+  bf16: false
+  metric_for_best_model: loss
+  ddp_find_unused_parameters: false
+  # whether to do the full eval saving logits (slower and consumes more memory but gets you weighted mae etc)
+  full_eval: false
+  # Used to stop training if the loss jumps
+  nan_loss_cutoff: 20
+  # flash_attention_2, sdpa (flash_attention_2 is faster and uses less memory but requires a more recent version of pytorch / gpu with bf16)
+  attn_implementation: sdpa
+  seed: 42
+  model_bf16: false
+  data_bf16: false
+  allow_tf32: true
+  activation_checkpointing: false
+  fsdp: false
+  finetune: false
+  batch_eval_metrics: false
+  gradient_checkpointing: false
+  lr_scheduler_kwargs: null
+  replace_lm_head: false
+  replace_atom_embedding: false
+  replace_norm_stats: false
+  override_lr: false
+  lr_layer_decay: null
+  fsdp_ckpt: False
+  # For distributed finetuning
+  # Set to max atoms per mol
+  max_force_per_item: null
+  force_pad_value: -200
+  ft_normalize_batch: false
+  scheduler_step_percentage: null
+
+model:
+  hidden_size: 256
+  num_layers: 8
+  num_attention_heads: 8
+  intermediate_size: 1024
+  model_size: null
+  hidden_dropout_prob: 0.0
+  attention_dropout_prob: 0.0
+  init_range: 0.02
+  init_strategy: sqrt
+  hidden_act: gelu
+  model_type: qwen3_pos_readout
+  causal: true
+  # Experimented with label smoothing but made training a bit more unstable
+  uniform_label_smoothing: 0.0
+  gaussian_label_smoothing_sigma: 0.0
+  loss_name: mse
+  eng_sum: false
+  no_pos_embed: false
+  pre_readout_layer_norm: false
+  llama_mlp: false
+  residual: false
+  small_init_head: false
+  mlp_bias: false
+  attention_bias: false
+  mlp_embed: false
+  concat_embeddings: false
+  regress_forces: true
+  multi_atom_embedding_dim: null
+  loss_weights:
+    special: 1.0
+    atomic_numbers: 1.0
+    pos: 1.0
+    force: 1.0
+    target: 1.0
+    cell: 1.0
+    stress: 1.0
+    force_r: 1.0
+    force_theta: 1.0
+    force_phi: 1.0
+
+dataset:
+  mlm_prob: 0.0
+  min_context: 0
+  max_context: 0
+  rotation_augmentation: false
+  permutation_augmentation: false
+  first_force_only: false # add only the force of the first atom to the sequence, must have permutation augmentation activated
+  max_seq_length: 1024
+  n_atom_types: 10
+  add_cell: false
+  per_atom_target: false
+  preprocessed: false
+  bins_path: null
+  continuous: true
+  joint_embedding: True
+  joint_embedding_force: True
+  joint_embed_atoms: True
+  training_percentage: null
+  energy_last: true
+  force_last: false
+  prior_path_train: null
+  prior_path_val: null
+  spin_min: null
+  spin_max: null
+  charge_min: null
+  charge_max: null
+  pipeline_v2: true
+  lmax: null

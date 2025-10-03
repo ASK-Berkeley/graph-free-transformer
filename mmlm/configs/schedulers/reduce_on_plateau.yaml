@@ -1,0 +1,9 @@
+# @package _global_
+training:
+  metric_for_best_model: force_mae
+  lr_scheduler: reduce_lr_on_plateau
+  lr_scheduler_kwargs:
+    factor: 0.5
+    patience: 2
+    min_lr: 0.000001
+    threshold: 0.0001

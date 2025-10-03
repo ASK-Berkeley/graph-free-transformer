@@ -1,0 +1,26 @@
+name: graph-free
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.11.6
+  - pip
+  - pip:
+      - fairchem-core>=2.0.0
+      - accelerate
+      - datasets
+      - evaluate
+      - huggingface-hub
+      - hydra-core
+      - scipy
+      - tokenizers
+      - torch
+      - transformers==4.52.4
+      - wandb
+      - matplotlib
+      - ase>=3.25.0
+      - ase-db-backends==0.10.0
+      - ogb
+      - rdkit
+      - git+https://github.com/KellerJordan/Muon.git

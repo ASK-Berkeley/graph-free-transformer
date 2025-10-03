@@ -1,0 +1,25 @@
+[project]
+name = "mmlm"
+version = "0.1.0"
+description = "G3F package"
+authors = [{ name = "Tobias Kreiman", email = "tkreiman@berkeley.edu" }]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+# TODO: Remove once torchtnt updates to not use pkg_resources (expected by 2025-11)
+filterwarnings = [
+    "ignore::UserWarning:torchtnt.utils.version",
+    "ignore:__array__ implementation doesn't accept a copy keyword:DeprecationWarning",
+]
+
+[tool.setuptools]
+packages = ["mmlm"]
+
+[tool.setuptools.package-dir]
+"" = "."

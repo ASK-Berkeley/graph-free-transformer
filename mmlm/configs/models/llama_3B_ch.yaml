@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+  - /models/causal_model
+model:
+  hidden_size: 2560
+  num_layers: 30
+  intermediate_size: 10240
+  num_attention_heads: 20
+  causal: true
+  model_type: llama
+  hidden_act: silu

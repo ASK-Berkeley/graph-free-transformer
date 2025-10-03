@@ -1,0 +1,65 @@
+# @package _global_
+defaults:
+  - /data/omol_4M
+
+
+wandb:
+  group_name: Omol
+  run_name: 57M_last_only_delta
+
+dataset:
+  # If null, use all data. Update for different scaling experiments.
+  training_percentage: null
+  energy_last: False
+  force_last: True
+  n_val: 1000
+  rotation_augmentation: True
+  per_atom_target: False
+  continuous: True
+  n_bins:
+    pos: 10
+    force: 10
+    target: 2048
+  joint_embedding: True
+  first_force_only: True
+  name: omol_fast
+
+  train_dataset:
+    cfg:
+      first_force_only: True
+      loader:
+        per_atom_target: False
+  val_dataset:
+    cfg:
+      first_force_only: True
+      loader:
+        per_atom_target: False
+        
+
+training:
+  bf16: False
+  fp16: True
+  # For NERSC, use 8 nodes so 32 GPUs for an effective batch size of 1024
+  batch_size: 16
+  gradient_accumulation_steps: 2
+  lr: 0.0003
+  torch_compile: True
+  eval_steps: 500
+  dataloader_num_workers: 0
+  num_epochs: 30
+  eval_batch_size: 16
+  nan_loss_cutoff: 20
+  max_grad_norm: 1
+  full_eval: False
+  resume_from_checkpoint: True
+  attn_implementation: sdpa # Seems to be similar to flash_attention_2 when enabling model_bf16
+  model_bf16: False
+  eval_accumulation_steps: 4
+
+model:
+  model_type: llama_continuous
+  loss_weights:
+    target: 1
+    force: 1
+    pos: 1
+  loss_name: xent
