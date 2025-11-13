@@ -1,0 +1,53 @@
+# @package _global_
+dataset:
+  name: omol
+  target: reference_energy
+  train_path: data/Omol/train_4M
+  val_path: data/Omol/val
+  normalize_target: false
+  n_atom_types: 100
+  center: true
+  max_n_atoms: 350
+  per_atom_target: true
+  max_seq_length: 2048
+  n_val: 1000
+  spin_min: 1
+  spin_max: 11
+  charge_min: -10
+  charge_max: 10
+  n_bins:
+    target: 512
+    pos: 512
+    force: 512
+  bins_method: quantile
+
+  train_dataset:
+    _target_: mmlm.datasets_v2.builder.build_dataset
+    cfg:
+      _target_: mmlm.datasets_v2.config.DatasetV2Cfg
+      loader:
+        _target_: mmlm.datasets_v2.loaders.omol_loader.OmolLoader
+        path: data/Omol/train_4M
+      transforms:
+        - _target_: mmlm.datasets_v2.core.transforms.RotationTransform
+      formatter:
+        _target_: mmlm.datasets_v2.core.formatter.AtomFormatter
+      bin_spec_path: data/bins/omol_joint_bins_10_10_2048.npz
+
+  val_dataset:
+    _target_: mmlm.datasets_v2.builder.build_dataset
+    cfg:
+      _target_: mmlm.datasets_v2.config.DatasetV2Cfg
+      loader:
+        _target_: mmlm.datasets_v2.loaders.omol_loader.OmolLoader
+        path: data/Omol/val
+      transforms: [] # No augmentations for validation
+      formatter:
+        _target_: mmlm.datasets_v2.core.formatter.AtomFormatter
+      bin_spec_path: data/bins/omol_joint_bins_10_10_2048.npz
+
+
+training:
+  batch_size: 64
+  eval_accumulation_steps: 1000
+  warmup_epochs: 1.0
