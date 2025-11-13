@@ -4,11 +4,9 @@ src/jmp.egg-info/
 mmlm/outputs/
 mmlm/bscripts/
 mmlm/slurm_logs/
-mmlm/data/
 mmlm/exp_logs/
 smaller_force_max_goal/
 *.ipynb
-data/
 exp_logs/
 outputs/
 src/
