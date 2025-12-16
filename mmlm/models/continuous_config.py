@@ -40,6 +40,7 @@ class ContinuousConfigMixin:
         base_model_type: str = "llama",
         multi_atom_embedding_dim: Optional[int] = None,
         regress_forces: bool = True,
+        old_mlp_version: bool = False,
         **kwargs
     ):
         super().__init__(**kwargs)
@@ -77,6 +78,7 @@ class ContinuousConfigMixin:
         self.base_model_type = base_model_type
         self.multi_atom_embedding_dim = multi_atom_embedding_dim
         self.regress_forces = regress_forces
+        self.old_mlp_version = old_mlp_version
 
 
 class ContinuousLlamaConfig(ContinuousConfigMixin, LlamaConfig):

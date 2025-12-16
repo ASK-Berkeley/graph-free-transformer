@@ -241,6 +241,7 @@ def get_model(args, tokenizer, start_end_indices_by_token_type):
         concat_embeddings=args.model.get("concat_embeddings", False),
         multi_atom_embedding_dim=multi_atom_embedding_dim,
         regress_forces=args.model.get("regress_forces", True),
+        old_mlp_version=args.model.get("old_mlp_version", False),
     )
     model = model_cls(
         config=continuous_config,

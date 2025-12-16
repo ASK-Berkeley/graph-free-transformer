@@ -178,14 +178,22 @@ class MLPOutput(nn.Module):
         residual: bool = False,
         llama_mlp: bool = False,
         config: Optional[LlamaConfig] = None,
+        old_mlp_version: bool = False,
     ):
         super().__init__()
         assert not (llama_mlp and residual), "Llama MLP cannot be residual"
 
         self.llama_mlp = llama_mlp
+        self.old_mlp_version = old_mlp_version
 
         if llama_mlp:
             self.mlp = OutputMLP(config, out_size)
+        elif old_mlp_version:
+            self.mlp = nn.Sequential(
+                nn.Linear(config.hidden_size, config.hidden_size * 2, bias=True),
+                nn.SiLU(),
+                nn.Linear(config.hidden_size * 2, out_size, bias=False),
+            )
         else:
             activation_fn = {
                 "silu": nn.SiLU(),
@@ -202,7 +210,7 @@ class MLPOutput(nn.Module):
                 self.mlp3 = nn.Linear(hidden_size, out_size, bias=False)
 
     def forward(self, x):
-        if self.llama_mlp:
+        if self.llama_mlp or self.old_mlp_version:
             out = self.mlp(x)
         else:
             out = self.mlp1(x)
@@ -318,28 +326,44 @@ class ContinuousModelForCausalLM(PreTrainedModel):
                 torch.tensor(config.force_std, dtype=torch.float, requires_grad=False),
             )
 
-        self.lm_head_number = self.get_output_head(
-            config,
-            config.mlp_output_head,
-            config.loss_name,
-            config.joint_embedding,
-            llama_mlp=config.llama_mlp,
-            residual=config.residual,
-        )
+        if config.old_mlp_version:
+            self.lm_head_number = nn.Sequential(
+                nn.Linear(config.hidden_size, config.hidden_size * 2, bias=True),
+                nn.SiLU(),
+                nn.Linear(config.hidden_size * 2, 3, bias=False),
+            )
+        else:
+            self.lm_head_number = self.get_output_head(
+                config,
+                config.mlp_output_head,
+                config.loss_name,
+                config.joint_embedding,
+                llama_mlp=config.llama_mlp,
+                residual=config.residual,
+                old_mlp_version=config.old_mlp_version,
+            )
 
         self.energy_head = config.energy_head
         self.grad_accumulation_steps = config.grad_accumulation_steps
         self.batch_size = config.batch_size
         if config.energy_head:
-            self.lm_head_energy = self.get_output_head(
-                config,
-                mlp_output_head=True,
-                loss_name=None,
-                joint_embedding=None,
-                out_size=1,
-                llama_mlp=config.llama_mlp,
-                residual=config.residual,
-            )
+            if config.old_mlp_version:
+                self.lm_head_energy = nn.Sequential(
+                    nn.Linear(config.hidden_size, config.hidden_size * 2, bias=True),
+                    nn.SiLU(),
+                    nn.Linear(config.hidden_size * 2, 1, bias=False),
+                )
+            else:
+                self.lm_head_energy = self.get_output_head(
+                    config,
+                    mlp_output_head=True,
+                    loss_name=None,
+                    joint_embedding=None,
+                    out_size=1,
+                    llama_mlp=config.llama_mlp,
+                    residual=config.residual,
+                    old_mlp_version=config.old_mlp_version,
+                )
 
             self.mae_loss = torch.nn.L1Loss(reduction="none")
 
@@ -470,6 +494,7 @@ class ContinuousModelForCausalLM(PreTrainedModel):
         out_size=None,
         llama_mlp: bool = False,
         residual: bool = False,
+        old_mlp_version: bool = False,
     ):
         if out_size is None:
             out_size = 1
@@ -485,6 +510,7 @@ class ContinuousModelForCausalLM(PreTrainedModel):
                 llama_mlp=llama_mlp,
                 residual=residual,
                 config=config,
+                old_mlp_version=old_mlp_version,
             )
         else:
             return nn.Linear(config.hidden_size, out_size, bias=False)

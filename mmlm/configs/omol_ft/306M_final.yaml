@@ -57,6 +57,7 @@ dataset:
       transforms: [] # No augmentations for validation
       formatter:
         _target_: mmlm.datasets_v2.core.formatter.AtomFormatter
+        finetune: True
       bin_spec_path: data/bins/omol_joint_bins_10_10_2048.npz
 
 training:
