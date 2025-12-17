@@ -559,6 +559,9 @@ def main(args: DictConfig):
         train_dataset = hydra.utils.instantiate(args.dataset.train_dataset)
         val_dataset = hydra.utils.instantiate(args.dataset.val_dataset)
         val_dataset_og = val_dataset
+        if args.dataset.get("n_val", None) is not None:
+            random_indices = np.random.permutation(len(val_dataset))
+            val_dataset = Subset(val_dataset, random_indices[:args.dataset.n_val])
     else:
         raise NotImplementedError("Legacy pipeline is not supported anymore!")
 
